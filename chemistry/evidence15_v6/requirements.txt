@@ -1,0 +1,6 @@
+openai
+python-dotenv
+json-repair
+aiohttp
+aiofiles
+tqdm
