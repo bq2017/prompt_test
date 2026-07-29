@@ -14,6 +14,7 @@ LOG="${OUTPUT_ROOT}/logs/${TAG}.log"
 REPORT_DIR="${OUTPUT_ROOT}/reports/${TAG}"
 
 mkdir -p "${OUT_DIR}" "$(dirname "${LOG}")" "${REPORT_DIR}"
+touch "${RESULT}" "${ERRORS}" "${LOG}"
 
 export CHEMISTRY_EVIDENCE15_V9_POSTPROCESS_PROFILE="evidence15_boundary_rules_v9_stage1"
 export PYTHONUNBUFFERED=1

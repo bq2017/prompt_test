@@ -15,6 +15,7 @@ from chemistry_evidence15_v9_schema import CORE_FEATURE_FIELDS, CORE_FEATURE_VAL
 
 PROMPT = ROOT / "prompts" / "evidence15_v9_prompt.txt"
 RUNNER = ROOT / "src" / "chemistry_difficulty_rating_evidence15_v9_with_cache.py"
+RUN_SCRIPT = ROOT / "tools" / "run_chemistry_evidence15_v9_stage1_teacher0724_591.sh"
 
 
 def load_prefix() -> str:
@@ -94,6 +95,7 @@ class PromptEvidence15V9ContractTests(unittest.TestCase):
 
     def test_runner_contract_and_default_concurrency(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
+        script = RUN_SCRIPT.read_text(encoding="utf-8")
         tree = ast.parse(source)
         entries = [
             node for node in tree.body
@@ -102,6 +104,8 @@ class PromptEvidence15V9ContractTests(unittest.TestCase):
         self.assertEqual(len(entries), 1)
         self.assertIn('PROMPT_FILENAME = "evidence15_v9_prompt.txt"', source)
         self.assertRegex(source, r'--concurrency"\s*,\s*type=int\s*,\s*default=30')
+        self.assertIn('--concurrency 30', script)
+        self.assertIn('touch "${RESULT}" "${ERRORS}" "${LOG}"', script)
 
 
 if __name__ == "__main__":
