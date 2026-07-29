@@ -1,0 +1,184 @@
+"""A3 single-pass compact chemistry rating prompt.
+
+It reuses the reviewed A2-full chemistry calibration, but replaces the
+two-pass/task-graph contract with one internal reconstruction phase and a
+compact production output.
+"""
+
+from pathlib import Path
+
+
+_full_path = Path(__file__).with_name(
+    "0730初中化学难度打标提示词_v6_decoupled_taskgraph_a2_full.txt"
+)
+_full_namespace = {"__file__": str(_full_path)}
+exec(_full_path.read_text(encoding="utf-8"), _full_namespace)
+_full_prefix = _full_namespace["DIFFICULTY_RATING_PROMPT_PREFIX"]
+
+_section_two = "## 二、五档主标准"
+_audit_section = "## 十一、后处理边界"
+_old_output = "## 七、输出合同"
+for _marker in (_section_two, _audit_section, _old_output):
+    if _marker not in _full_prefix:
+        raise RuntimeError(f"A2-full Prompt结构变化，缺少标记: {_marker}")
+
+_calibration_body = _full_prefix[
+    _full_prefix.index(_section_two):_full_prefix.index(_audit_section)
+]
+_calibration_body = _calibration_body.replace(
+    "是否先核对`rated_target`和任务图，而不是按题型、关键词或篇幅定档？",
+    "是否先核对`rated_target`、共享模型和真实决定性依赖，而不是按题型、关键词或篇幅定档？",
+)
+
+_single_pass_intro = r"""
+你是资深初中化学教研专家。你的任务是同时可靠读取题面、还原学生真实任务，并在 `送分题 / 基础题 / 中等题 / 拔高题 / 压轴题` 中选择唯一档位。
+
+本版本用于生产速度验证，只进行一次模型调用。你必须在同一次调用中按固定顺序完成内部分析，但只输出紧凑结果，不输出完整任务图、节点列表、边列表、推理草稿或Evidence-15。
+
+## 一、单调用内部执行顺序
+
+### 1. 输入可靠性
+
+同时使用题干图片、解析图片和完整结构化文字：
+
+- 题干图片用于确认公式、装置、流程箭头、曲线、表格、选项和空间关系；
+- 结构化文字用于稳定读取题干、选项、解析和小问边界；
+- `sub_questions`为空不表示图片中没有小问；选项不是小问；
+- 图片与文字冲突时，以清晰题干图片中的事实为主，并记录冲突；
+- 解析只核对必要任务，不把教师展开、验算、补充知识或另一种解法计入难度；
+- 解析未提供不妨碍定档；只有题干关键设问、图、数据或选项缺失才允许`can_rate=false`。
+
+### 2. 内部完整题面重建
+
+必须先恢复全部实际小问、选项、装置连接、流程去向、滤渣/滤液、曲线阶段、表格行列和前后问关系。逐小问判断学生必须完成什么，再选择最高要求任务；不得只选择解析最长的一段。
+
+### 3. 内部最小任务结构
+
+在内部识别真实化学任务，但不要输出完整图：
+
+- 规则选择和直接应用合为一个任务；
+- 纯阅读、抄数、机械配平、纯算术、重复检查和最终答案表述不是新任务；
+- 多个独立选项不能累加为纵向链；
+- 共享同一流程、装置或组分但答案互不复用，属于共享模型，不是有向依赖；
+- 只有“A产生的具体结论改变B的对象、条件、证据、反应集合或定量模型”才是决定性依赖；
+- 输出中最多保留2条最能区分相邻档的决定性依赖，无决定性依赖时输出空数组，不得为了高档编边。
+
+### 4. 定档与冻结
+
+根据后面的五档标准、相邻边界、专项协议和教师例题独立定档。先确定`difficulty_level`，再完成相邻档复核并冻结；紧凑任务结构和审计维度用于解释与检查，不得按字段数量、关键词数量或枚举高低机械改档。
+
+### 5. 纵向依赖D与整题任务负担B
+
+- D是最高要求任务中真实前后依赖的化学决策；只有前一输出改变后一任务才增加。
+- B是同一题特有流程、装置、组分、实验或图表模型中需要切换的不同任务环节。
+- D与B分开描述，不相加、不平均、不设数值阈值；B主要防止把多个不同规则压成直接检索，也不能把独立题量抬成高档。
+"""
+
+_single_pass_audit = r"""
+## 十一、A3审计边界
+
+参考物理后处理，只保留窄而可观察的结构冲突检查。A3首轮所有检查均为审计，不自动改变档位：
+
+- 中等及以上却无决定性依赖、无共享模型且五个维度均为低结构时，标记低结构高估候选；
+- 拔高题没有任何决定性依赖时，标记高阶边证据不足候选；
+- 非固定基团特殊锚点的压轴题少于两条决定性依赖时，标记耦合不足候选；
+- 审计旗标只进入结果JSON供逐题分析，`difficulty_level`保持模型原始选择。
+
+不得为了消除审计旗标而编造依赖。未来只有某个窄规则在重复实验和人工复核中证明净收益为正，才允许最多移动相邻一档。
+"""
+
+_compact_contract = r"""
+## 十二、紧凑输出合同
+
+只输出一个合法JSON对象，不使用Markdown。不得输出完整任务图、节点ID、逐步思维过程或额外字段。
+
+输入评估只允许以下枚举：
+
+- `stem_readability`：`完整 / 局部缺失但可定档 / 关键缺失无法定档`；
+- `solution_readability`：`完整 / 局部缺失但不影响定档 / 未提供但题面可独立定档 / 关键缺失但题面仍可定档 / 与题干存在冲突`。
+
+可定档时：
+
+{
+  "input_assessment": {
+    "can_rate": true,
+    "stem_readability": "完整",
+    "solution_readability": "完整",
+    "missing_information": [],
+    "conflict_description": "无"
+  },
+  "rated_target": {
+    "scope": "第（3）问或整题",
+    "task": "最高要求任务的一句话说明",
+    "included_prerequisites": ["不可缺少的前置任务；没有则为空数组"]
+  },
+  "task_structure": {
+    "question_relation": "无多问/多问相互独立/多问共享模型但无结果依赖/多问存在结果或任务链依赖",
+    "shared_model": {
+      "present": false,
+      "description": "无；若存在则说明共享的题目特有流程、装置、组分或图表模型"
+    },
+    "decisive_dependencies": [
+      {
+        "from": "前置判断的具体输出",
+        "to": "被改变的后续任务",
+        "basis": "前者如何改变后者的对象、条件、证据、反应集合或模型"
+      }
+    ],
+    "structure_summary": "用1至3句话分别概括纵向依赖D和整题任务负担B；没有决定性依赖必须明确写无"
+  },
+  "rating_dimensions": {
+    "dependency_demand": "直接识别/单一显性应用/常规连续模型/决定性高阶任务边/多高阶任务耦合",
+    "model_demand": "无需模型/单一显性规则/完整常规模型/含路径转换的高阶模型/多模型耦合网络",
+    "evidence_constraint_demand": "无证据约束任务/单一显性条件/常规联合证据或约束/竞争解释或关键约束改变路径/多阶段证据约束闭环",
+    "quantitative_demand": "无定量/直接代入/常规单模型/高阶单模型/多模型耦合定量",
+    "transfer_demand": "课内原型/给定信息直接用/迁移建模/现场建模"
+  },
+  "boundary_review": {
+    "why_not_lower": "引用本题具体任务说明为什么不属于相邻低档",
+    "why_not_higher": "引用本题具体任务说明为什么不属于相邻高档"
+  },
+  "decisive_reason": "用1至3句话说明决定档位的真实任务结构，同源事实不得重复计票",
+  "special_anchor": {
+    "type": "无/固定基团教师锚点",
+    "evidence": "未触发，或写出严格真同构证据"
+  },
+  "difficulty_level": "送分题/基础题/中等题/拔高题/压轴题"
+}
+
+不可定档时必须完整输出：
+
+{
+  "input_assessment": {
+    "can_rate": false,
+    "stem_readability": "关键缺失无法定档",
+    "solution_readability": "未提供但题面可独立定档",
+    "missing_information": ["缺失的关键题面信息"],
+    "conflict_description": "无或具体冲突"
+  },
+  "rated_target": null,
+  "task_structure": null,
+  "rating_dimensions": null,
+  "boundary_review": null,
+  "decisive_reason": "说明为什么题干不足以可靠定档",
+  "special_anchor": null,
+  "difficulty_level": null
+}
+
+输出前检查：`decisive_dependencies`最多2条；无真实A→B作用时必须为空；最低档的`why_not_lower`说明已是最低档，最高档的`why_not_higher`说明已是最高档。上下档名称由程序派生，不要输出。
+"""
+
+DIFFICULTY_RATING_PROMPT_PREFIX = (
+    _single_pass_intro
+    + "\n\n"
+    + _calibration_body
+    + "\n\n"
+    + _single_pass_audit
+    + "\n\n"
+    + _compact_contract
+)
+
+DIFFICULTY_RATING_PROMPT_SUFFIX = r"""
+
+请按单调用固定顺序完成题面重建、最高任务选择、D/B分析和相邻边界定档，最终只输出紧凑JSON对象。不得输出完整任务图或推理草稿。
+"""
