@@ -30,6 +30,12 @@ def execute_prompt(path: Path) -> dict:
     return namespace
 
 
+def normalized_text_sha256(path: Path) -> str:
+    """Hash text content independent of Git checkout line endings."""
+    text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(text.encode("utf-8")).hexdigest().upper()
+
+
 def reconstruction() -> dict:
     return validate_reconstruction({
         "input_assessment": {
@@ -130,23 +136,23 @@ class FullPromptTests(unittest.TestCase):
 
     def test_control_prompts_are_unchanged(self) -> None:
         self.assertEqual(
-            hashlib.sha256(V6_PROMPT.read_bytes()).hexdigest().upper(),
-            "12689B324181F73D2F454FFFB7EEA425197787CA001D42E05D9CAC1B57381B5B",
+            normalized_text_sha256(V6_PROMPT),
+            "AE50AA0FEAFD170651975728FB54C086A11C782F8F4B1B42B078FBF97976B871",
         )
         self.assertEqual(
-            hashlib.sha256(A1_PROMPT.read_bytes()).hexdigest().upper(),
+            normalized_text_sha256(A1_PROMPT),
             "94E8F346A6F9C49664811FDBE8919594FF345DB02F6C015103FADEBC787943B8",
         )
         self.assertEqual(
-            hashlib.sha256(TASK_SHORT.read_bytes()).hexdigest().upper(),
+            normalized_text_sha256(TASK_SHORT),
             "2FA70C6CD05FD0F73C92655CA1F8F746C2AE67760BED13C1D7A397368E083D5F",
         )
         self.assertEqual(
-            hashlib.sha256(RATING_SHORT.read_bytes()).hexdigest().upper(),
+            normalized_text_sha256(RATING_SHORT),
             "DB3A13C44175C068CE0EB18372CAFF318CE780EBEE9759BAABFCCEB4CBEF9940",
         )
         self.assertEqual(
-            hashlib.sha256(RUNNER_SHORT.read_bytes()).hexdigest().upper(),
+            normalized_text_sha256(RUNNER_SHORT),
             "1770BF8F2D7386F93E304260D29B7C1C2CD2AE1EAB090D0EE4D9BDB47AE3BF50",
         )
 
