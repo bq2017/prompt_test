@@ -31,7 +31,7 @@ DEFAULT_PROMPT = PROJECT_ROOT / "prompts" / "0730初中化学难度打标提示�
 DEFAULT_CACHE = PROJECT_ROOT / "chemistry_v8_full_taskgraph_prompt_cache.json"
 MAX_JSON_RETRIES = int(os.getenv("CHEMISTRY_V8_JSON_RETRIES", "2"))
 MAX_SCHEMA_RETRIES = int(os.getenv("CHEMISTRY_V8_SCHEMA_RETRIES", "2"))
-DEFAULT_CONCURRENCY = int(os.getenv("CHEMISTRY_V8_CONCURRENCY", "15"))
+DEFAULT_CONCURRENCY = int(os.getenv("CHEMISTRY_V8_CONCURRENCY", "30"))
 STAGE = "v8_single_call_full_taskgraph"
 
 

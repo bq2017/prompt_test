@@ -27,6 +27,7 @@ from evaluate_chemistry_difficulty import extract_prediction  # noqa: E402
 
 PROMPT = ROOT / "prompts" / "0730初中化学难度打标提示词_v8_full_taskgraph.txt"
 RUNNER = ROOT / "src" / "chemistry_difficulty_rating_0730_v8_full_taskgraph_with_cache.py"
+RUN_SCRIPT = ROOT / "tools" / "run_chemistry_v8_full_taskgraph_teacher0724_591.sh"
 V6_PROMPT = ROOT / "prompts" / "0730初中化学难度打标提示词_v5_2_evidence15_v6.txt"
 A3_PROMPT = ROOT / "prompts" / "0730初中化学难度打标提示词_v6_single_pass_compact_a3.txt"
 
@@ -142,7 +143,10 @@ class PromptAndCompatibilityTests(unittest.TestCase):
 
     def test_runner_is_single_call_and_observe_only(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
+        script = RUN_SCRIPT.read_text(encoding="utf-8")
         self.assertIn('STAGE = "v8_single_call_full_taskgraph"', source)
+        self.assertIn('CHEMISTRY_V8_CONCURRENCY", "30"', source)
+        self.assertIn('CHEMISTRY_V8_CONCURRENCY:-30', script)
         self.assertIn("apply_v8_observe_only_postprocess", source)
         self.assertIn("automatic_level_change_applied", source)
         self.assertNotIn("chemistry_core12_schema", source)
