@@ -28,6 +28,12 @@ V6_PROMPT = ROOT / "prompts" / "0730初中化学难度打标提示词_v5_2_evide
 A1_PROMPT = ROOT / "prompts" / "0730初中化学难度打标提示词_v6_decoupled_taskgraph_a1.txt"
 
 
+def normalized_text_sha256(path: Path) -> str:
+    """Hash prompt content independent of Git checkout line endings."""
+    text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(text.encode("utf-8")).hexdigest().upper()
+
+
 def reconstruction() -> dict:
     return {
         "input_assessment": {
@@ -133,11 +139,11 @@ class PromptIsolationTests(unittest.TestCase):
 
     def test_control_prompts_are_unchanged(self) -> None:
         self.assertEqual(
-            hashlib.sha256(V6_PROMPT.read_bytes()).hexdigest().upper(),
-            "12689B324181F73D2F454FFFB7EEA425197787CA001D42E05D9CAC1B57381B5B",
+            normalized_text_sha256(V6_PROMPT),
+            "AE50AA0FEAFD170651975728FB54C086A11C782F8F4B1B42B078FBF97976B871",
         )
         self.assertEqual(
-            hashlib.sha256(A1_PROMPT.read_bytes()).hexdigest().upper(),
+            normalized_text_sha256(A1_PROMPT),
             "94E8F346A6F9C49664811FDBE8919594FF345DB02F6C015103FADEBC787943B8",
         )
 

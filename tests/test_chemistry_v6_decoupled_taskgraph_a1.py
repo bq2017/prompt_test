@@ -22,6 +22,14 @@ from chemistry_decoupled_taskgraph_schema import (  # noqa: E402
 
 PROMPT = ROOT / "prompts" / "0730初中化学难度打标提示词_v6_decoupled_taskgraph_a1.txt"
 V6_PROMPT = ROOT / "prompts" / "0730初中化学难度打标提示词_v5_2_evidence15_v6.txt"
+
+
+def normalized_text_sha256(path: Path) -> str:
+    """Hash prompt content independent of Git checkout line endings."""
+    text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(text.encode("utf-8")).hexdigest().upper()
+
+
 RUNNER = ROOT / "src" / "chemistry_difficulty_rating_0730_v6_decoupled_taskgraph_a1_with_cache.py"
 
 
@@ -117,10 +125,10 @@ class PromptContractTests(unittest.TestCase):
         self.assertEqual(self.prompt.count("【边界说明】"), 10)
 
     def test_v6_prompt_is_unchanged(self) -> None:
-        digest = hashlib.sha256(V6_PROMPT.read_bytes()).hexdigest().upper()
+        digest = normalized_text_sha256(V6_PROMPT)
         self.assertEqual(
             digest,
-            "12689B324181F73D2F454FFFB7EEA425197787CA001D42E05D9CAC1B57381B5B",
+            "AE50AA0FEAFD170651975728FB54C086A11C782F8F4B1B42B078FBF97976B871",
         )
 
     def test_runner_uses_new_prompt_and_full_text_grounding(self) -> None:
