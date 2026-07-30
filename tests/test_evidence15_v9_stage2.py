@@ -70,21 +70,21 @@ class Evidence15V9Stage2Tests(unittest.TestCase):
         for text in ("任务图", "任务边", "任务台账", "三点五", "最终档位确定后", "六步流程"):
             self.assertNotIn(text, self.prompt)
 
-    def test_low_boundary_requires_real_conversion_not_breadth(self) -> None:
+    def test_low_boundary_distinguishes_direct_recall_from_real_application(self) -> None:
         self.assertIn("多个彼此独立的直接检索点", self.prompt)
-        self.assertIn("B只用于描述广度，不能替代这次真实转换", self.prompt)
-        self.assertIn("若最高难任务仍为D=0", self.prompt)
+        self.assertIn("实际应用路径", self.prompt)
+        self.assertIn("竞争辨析路径", self.prompt)
 
     def test_middle_boundary_has_dependency_and_complete_closure_paths(self) -> None:
-        self.assertIn("前一步产生的新结论被后一步使用", self.prompt)
-        self.assertIn("共同完成一个不可缺少的常规任务闭环", self.prompt)
-        self.assertIn("不要求答案被下一小问直接复用", self.prompt)
+        self.assertIn("连续依赖：中间结论被后续反应选择", self.prompt)
+        self.assertIn("连续依赖、完整闭环和综合核验三条通道", self.prompt)
+        self.assertIn("不能仅因“答案独立”拆成基础题", self.prompt)
 
     def test_hard_and_final_boundaries_have_two_structural_paths(self) -> None:
         self.assertIn("拔高题有两条成立路径", self.prompt)
-        self.assertIn("约5—6个非重复有效决策", self.prompt)
-        self.assertIn("也可以由完整的模型依赖成立", self.prompt)
-        self.assertIn("可以发生在同一设问内部", self.prompt)
+        self.assertIn("综合主线路径", self.prompt)
+        self.assertIn("压轴题不以步骤数量为门槛", self.prompt)
+        self.assertIn("若题目是单一设问，也可写设问内部的阶段关系", self.prompt)
 
     def test_schema_contract_keeps_fields_and_records_stage2_metadata(self) -> None:
         source = valid_result()
