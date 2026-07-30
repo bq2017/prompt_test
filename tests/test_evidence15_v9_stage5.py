@@ -86,6 +86,8 @@ class Evidence15V9Stage5Tests(unittest.TestCase):
         self.assertIn('--labels "${LABELS}"', script)
         self.assertIn("顶层 difficulty 是旧输入错误标签", script)
         self.assertIn("postprocess_audit_actions", script)
+        self.assertIn('if [[ ! -s "${RESULT}" ]]', script)
+        self.assertIn("停止评测和打包", script)
 
     def test_automatic_hard_to_final_is_audit_only(self) -> None:
         runner = load_runner()

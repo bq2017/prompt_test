@@ -58,6 +58,11 @@ PYTHON=(
     --error "${ERRORS}" \
     --concurrency 30
 
+  if [[ ! -s "${RESULT}" ]]; then
+    echo "错误: 模型结果JSONL为空，停止评测和打包: ${RESULT}" >&2
+    exit 1
+  fi
+
   "${PYTHON[@]}" "${ROOT}/tools/evaluate_chemistry_difficulty.py" \
     --labels "${LABELS}" \
     --predictions "${RESULT}" \
