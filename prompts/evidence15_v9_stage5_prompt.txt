@@ -5,6 +5,7 @@ _BASE_PATH = Path.cwd() / "prompts" / "evidence15_v9_prompt.txt"
 _namespace: dict[str, object] = {}
 exec(_BASE_PATH.read_text(encoding="utf-8"), _namespace)
 DIFFICULTY_RATING_PROMPT_PREFIX = str(_namespace["DIFFICULTY_RATING_PROMPT_PREFIX"])
+DIFFICULTY_RATING_PROMPT_SUFFIX = str(_namespace["DIFFICULTY_RATING_PROMPT_SUFFIX"])
 
 
 def _replace_once(old: str, new: str) -> None:

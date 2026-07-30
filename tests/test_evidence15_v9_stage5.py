@@ -42,6 +42,12 @@ class Evidence15V9Stage5Tests(unittest.TestCase):
         self.assertIn('Path.cwd() / "prompts" / "evidence15_v9_prompt.txt"', source)
         self.assertNotIn("evidence15_v9_stage4_prompt.txt", source)
 
+    def test_production_loader_accepts_stage5_prompt(self) -> None:
+        runner = load_runner()
+        runner.load_prompt_config(str(STAGE5_PROMPT_PATH))
+        self.assertIn("用不可分离强关系统一终审", runner.DIFFICULTY_RATING_PROMPT_PREFIX)
+        self.assertTrue(runner.DIFFICULTY_RATING_PROMPT_SUFFIX.strip())
+
     def test_final_boundary_has_one_structural_standard(self) -> None:
         self.assertIn("用不可分离强关系统一终审", self.prompt)
         self.assertIn("模型选择", self.prompt)
