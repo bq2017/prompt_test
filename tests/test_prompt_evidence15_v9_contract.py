@@ -35,22 +35,25 @@ class PromptEvidence15V9ContractTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.prompt = load_prefix()
 
-    def test_v9_stage1_uses_six_steps_and_rates_before_features(self) -> None:
-        self.assertIn("## 一、统一的六步处理流程", self.prompt)
+    def test_v9_uses_seven_steps_and_reviews_after_features(self) -> None:
+        self.assertIn("## 一、统一的七步处理流程", self.prompt)
         self.assertIn("### 第三步：核对真实解题任务", self.prompt)
-        rating_index = self.prompt.index("### 第四步：五维初判并完成相邻定档")
+        rating_index = self.prompt.index("### 第四步：五维初判并选择相邻粗区间")
         feature_index = self.prompt.index("### 第五步：填写15项难度审计特征")
+        review_index = self.prompt.index("### 第六步：回到真实任务完成相邻边界终审")
         self.assertLess(rating_index, feature_index)
-        self.assertIn("最终档位确定后", self.prompt[feature_index:])
+        self.assertLess(feature_index, review_index)
 
     def test_obsolete_structure_terms_are_absent(self) -> None:
         for text in (
             "任务图",
             "任务边",
+            "任务台账",
             "三点五",
             "12个核心特征",
             "12项核心特征",
-            "统一的七步处理流程",
+            "统一的六步处理流程",
+            "最终档位确定后",
         ):
             self.assertNotIn(text, self.prompt)
 

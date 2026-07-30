@@ -1,7 +1,7 @@
-"""Chemistry Evidence-15 V9 stage-1 contract and existing adjacent postprocessing.
+"""Chemistry Evidence-15 V9 stage-2 contract with unchanged stage-1 postprocessing.
 
 The model contract contains only ``features``, ``coarse_difficulty``,
-``reasoning`` and ``difficulty_level``.  V9 stage 1 keeps the 15-field output
+``reasoning`` and ``difficulty_level``.  V9 stage 2 keeps the 15-field output
 shape but treats fields as factual audit records after rating.  Schema
 validation therefore checks exact fields and enums without forcing the entry
 operation to determine total reasoning depth or forcing internal dependency
@@ -122,7 +122,7 @@ def validate_core_features(raw: Any) -> dict[str, str]:
 
 
 def validate_features(raw: Any) -> dict[str, str]:
-    """Validate the exact V9 stage-1 15-field audit object.
+    """Validate the exact V9 stage-2 15-field audit object.
 
     Cross-field semantics remain a prompt/reasoning audit.  They are not hard
     schema failures because ``entry_operation`` describes the first substantive
@@ -284,7 +284,7 @@ def validate_and_prepare_result(
         raise Core12SchemaError("reasoning的4个字段均不得为空")
 
     prepared["features"] = core
-    prepared["feature_schema_version"] = "chemistry_evidence15_v9_stage1"
+    prepared["feature_schema_version"] = "chemistry_evidence15_v9_stage2"
     prepared["schema_validation_passed"] = True
     prepared["automatic_level_change_applied"] = False
     prepared["postprocess_original_level"] = level

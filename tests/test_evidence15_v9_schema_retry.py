@@ -155,7 +155,7 @@ class Core12SchemaTests(unittest.TestCase):
         self.assertEqual(prepared["difficulty_level"], source["difficulty_level"])
         self.assertFalse(prepared["automatic_level_change_applied"])
         self.assertEqual(prepared["postprocess_profile"], "evidence15_v9_schema_only")
-        self.assertEqual(prepared["feature_schema_version"], "chemistry_evidence15_v9_stage1")
+        self.assertEqual(prepared["feature_schema_version"], "chemistry_evidence15_v9_stage2")
         self.assertEqual(prepared["postprocess_original_level"], source["difficulty_level"])
 
     def test_entry_operation_does_not_force_total_reasoning_depth(self) -> None:

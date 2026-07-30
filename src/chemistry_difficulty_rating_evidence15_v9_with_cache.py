@@ -9,9 +9,9 @@
     v4：基于100题人工复核结果，收紧“标准实验题虚高”和“压轴题虚高”，增强金属滤渣滤液、流程/图表/守恒题的拔高识别。
     v5：基于第二轮100题复核结果，小修5类边界：化学史送分、标准实验多问基础、空气含量压强曲线中等、NaHCO3纯度拔高、常见物质转化推断中等。
     v6：基于300题复核结果，小修8类边界：化学发展简史送分、溶液分类基础、CO还原氧化铁+燃烧条件组合中等、陌生复杂方程式配平中等、陌生材料迁移中等、红磷气压曲线中等、标准碳酸钠沉淀纯度表格中等、KClO3单反应质量图中等。
-    V9阶段1：先按真实解题任务和五维主标准完成相邻定档，再填写15项审计特征；
+    V9阶段2：修正相邻边界与完整任务识别，再填写15项审计特征并完成相邻终审；
     取消入口操作与总推理深度、内部依赖与多问依赖之间的错误强绑定。
-    本阶段保留图片输入、缓存、重试和既有后处理算法，不提前实施后续边界重写。
+    本阶段保留图片输入、缓存、重试和阶段1后处理算法，不提前实施教师示例整理或后处理重写。
     难度级别：送分题 / 基础题 / 中等题 / 拔高题 / 压轴题。
 """
 
@@ -2069,7 +2069,7 @@ async def main_batch_run() -> None:
 
 
 
-# -------------------------- 8. Evidence-15 V9阶段1 image-primary/mintext后处理 --------------------------
+# -------------------------- 8. Evidence-15 V9阶段2 image-primary/mintext后处理 --------------------------
 # 为隔离输入模态，默认prompt_only；旧语义规则只保留用于非默认复现。
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
@@ -2830,7 +2830,7 @@ def postprocess_safe(result: dict[str, Any], data: dict[str, Any]) -> dict[str, 
 
 
 
-# -------------------------- 9. Evidence-15 V9阶段1严格生产契约 --------------------------
+# -------------------------- 9. Evidence-15 V9阶段2严格生产契约 --------------------------
 #
 # 本版保留图片输入、缓存、重试和并发，只替换生产JSON与后处理入口：
 #   1. 模型只输出features/coarse_difficulty/reasoning/difficulty_level；
@@ -2861,7 +2861,7 @@ def postprocess_chemistry_difficulty(
 ) -> Dict[str, Any]:
     """The only production postprocess entry.
 
-    schema_only只校验结构；V9阶段1后处理沿用V6算法，按15项证据交集
+    schema_only只校验结构；V9阶段2继续沿用阶段1后处理，按15项证据交集
     最多调整一个相邻档，并完整记录postprocess_actions。
     """
     if CORE12_POSTPROCESS_PROFILE not in {
@@ -2893,8 +2893,8 @@ def postprocess_chemistry_difficulty(
     return prepared
 
 if __name__ == "__main__":
-    print("Evidence-15 V9阶段1: 真实解题任务优先 + 定档后填写15项审计特征")
-    print(f"Evidence-15 V9阶段1后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法沿用V6，未提前重写）")
+    print("Evidence-15 V9阶段2: 相邻边界修正 + 完整任务识别 + 事实特征终审")
+    print(f"Evidence-15 V9阶段2后处理配置: {CORE12_POSTPROCESS_PROFILE}（与阶段1相同，用raw结果归因Prompt）")
     print(f"Evidence-15 V9旧结构兼容: {'enabled' if ALLOW_LEGACY_CORE12_SCHEMA else 'disabled'}")
     print(f"Evidence-15 V9 image-primary图像输入: {'enabled' if ENABLE_IMAGE_INPUT else 'disabled'}")
     start_time = time.time()
