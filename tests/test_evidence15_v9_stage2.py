@@ -72,8 +72,8 @@ class Evidence15V9Stage2Tests(unittest.TestCase):
 
     def test_low_boundary_distinguishes_direct_recall_from_real_application(self) -> None:
         self.assertIn("多个彼此独立的直接检索点", self.prompt)
-        self.assertIn("实际应用路径", self.prompt)
-        self.assertIn("竞争辨析路径", self.prompt)
+        self.assertIn("真实推导路径", self.prompt)
+        self.assertIn("实质竞争辨析路径", self.prompt)
 
     def test_middle_boundary_has_dependency_and_complete_closure_paths(self) -> None:
         self.assertIn("连续依赖：中间结论被后续反应选择", self.prompt)

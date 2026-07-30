@@ -28,11 +28,11 @@ class Evidence15V9Stage21Tests(unittest.TestCase):
         cls.prompt = load_prompt()
 
     def test_low_boundary_has_two_operational_paths(self) -> None:
-        self.assertIn("实际应用路径", self.prompt)
-        self.assertIn("竞争辨析路径", self.prompt)
+        self.assertIn("真实推导路径", self.prompt)
+        self.assertIn("实质竞争辨析路径", self.prompt)
         self.assertIn("由已给pH数值直接识别酸碱性", self.prompt)
-        self.assertIn("指示剂变化、实验现象或用途并要求推出", self.prompt)
-        self.assertIn("易混标准→干扰项→排除依据", self.prompt)
+        self.assertIn("由指示剂变化推出未明示的溶液性质", self.prompt)
+        self.assertIn("竞争解释A/B→决定性差异→排除结果", self.prompt)
 
     def test_middle_boundary_has_three_paths_and_precedence(self) -> None:
         self.assertIn("连续依赖、完整闭环和综合核验三条通道", self.prompt)
@@ -62,7 +62,7 @@ class Evidence15V9Stage21Tests(unittest.TestCase):
     def test_summary_self_check_and_output_template_use_same_vocabulary(self) -> None:
         self.assertIn("连续依赖、完整闭环或综合核验", self.prompt)
         self.assertIn("一个具体高阶卡点，或写清不同实质任务如何围绕同一题目模型形成综合主线", self.prompt)
-        self.assertIn("实际应用或竞争辨析、常规综合、单一高阶卡点、综合主线或跨阶段联合模型", self.prompt)
+        self.assertIn("真实推导或实质竞争辨析、常规综合、单一高阶卡点、综合主线或跨阶段联合模型", self.prompt)
 
     def test_schema_fields_and_postprocess_profile_are_unchanged(self) -> None:
         self.assertEqual(len(CORE_FEATURE_FIELDS), 15)
@@ -73,11 +73,9 @@ class Evidence15V9Stage21Tests(unittest.TestCase):
         self.assertIn('export CHEMISTRY_EVIDENCE15_V9_POSTPROCESS_PROFILE="evidence15_boundary_rules_v9_stage1"', script)
         self.assertIn("--concurrency 30", script)
 
-    def test_stage21_version_is_visible_in_runner_and_script(self) -> None:
+    def test_current_v9_stage_is_visible_in_runner(self) -> None:
         source = RUNNER_PATH.read_text(encoding="utf-8")
-        script = RUN_SCRIPT_PATH.read_text(encoding="utf-8")
-        self.assertIn("Evidence-15 V9阶段2.1", source)
-        self.assertIn("evidence15_v9_stage2_1_591_", script)
+        self.assertIn("Evidence-15 V9阶段2.2", source)
 
 
 if __name__ == "__main__":

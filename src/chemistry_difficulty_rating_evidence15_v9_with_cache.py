@@ -2893,8 +2893,8 @@ def postprocess_chemistry_difficulty(
     return prepared
 
 if __name__ == "__main__":
-    print("Evidence-15 V9阶段2.1: 定义一致性修复 + 去除步骤数量硬门槛")
-    print(f"Evidence-15 V9阶段2.1后处理配置: {CORE12_POSTPROCESS_PROFILE}（与阶段1相同，用raw结果归因Prompt）")
+    print("Evidence-15 V9阶段2.2: 1↔2教材原型识别与真实推导边界收窄")
+    print(f"Evidence-15 V9阶段2.2后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法不变，同时报告raw与final）")
     print(f"Evidence-15 V9旧结构兼容: {'enabled' if ALLOW_LEGACY_CORE12_SCHEMA else 'disabled'}")
     print(f"Evidence-15 V9 image-primary图像输入: {'enabled' if ENABLE_IMAGE_INPUT else 'disabled'}")
     start_time = time.time()

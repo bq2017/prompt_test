@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Evaluate chemistry difficulty predictions against cleaned labels by ID."""
+"""Evaluate predictions only against teacher-cleaned CSV labels by question ID.
+
+The top-level ``difficulty`` field in prediction JSONL files is a stale input
+label. It is not the teacher-cleaned label and must never be used for scoring.
+"""
 
 from __future__ import annotations
 
@@ -19,6 +23,8 @@ LEVEL_NAME_TO_NUMBER = {
     "压轴题": 5,
 }
 LEVEL_NUMBER_TO_NAME = {value: key for key, value in LEVEL_NAME_TO_NUMBER.items()}
+STANDARD_LABEL_SOURCE = "teacher_clean_csv.standard_level"
+TOP_LEVEL_DIFFICULTY_POLICY = "ignored_stale_input_label"
 
 
 def parse_args() -> argparse.Namespace:
@@ -105,7 +111,6 @@ def load_predictions(
             "predicted_level_name": level_name,
             "predicted_level": level_number,
             "stem": str(item.get("stem", "") or ""),
-            "historical_difficulty": item.get("difficulty"),
             "api_time_use": item.get("api_time_use"),
             "postprocess_original_level": (
                 item.get("difficulty_rating", {}).get("postprocess_original_level")
@@ -258,6 +263,9 @@ def main() -> None:
     }
     report = {
         "labels_file": str(labels_path),
+        "standard_label_source": STANDARD_LABEL_SOURCE,
+        "prediction_jsonl_top_level_difficulty_policy": TOP_LEVEL_DIFFICULTY_POLICY,
+        "prediction_jsonl_top_level_difficulty_used_for_scoring": False,
         "predictions_file": str(predictions_path),
         "errors_file": str(errors_path) if errors_path else None,
         "level_source": args.level_source,
@@ -285,6 +293,8 @@ def main() -> None:
         json.dump(report, handle, ensure_ascii=False, indent=2)
     write_csv(mismatches_path, mismatch_rows)
 
+    print("标准标签来源: 教师清洗CSV的 standard_level")
+    print("重要: 预测JSONL顶层 difficulty 是旧输入错误标签，评测已明确忽略")
     print(f"本次模型输出唯一 ID: {len(predictions)}")
     print(f"其中有干净标准标签: {attempted_count}")
     print(f"合法难度预测: {legal_count}")
