@@ -9,7 +9,7 @@
     v4：基于100题人工复核结果，收紧“标准实验题虚高”和“压轴题虚高”，增强金属滤渣滤液、流程/图表/守恒题的拔高识别。
     v5：基于第二轮100题复核结果，小修5类边界：化学史送分、标准实验多问基础、空气含量压强曲线中等、NaHCO3纯度拔高、常见物质转化推断中等。
     v6：基于300题复核结果，小修8类边界：化学发展简史送分、溶液分类基础、CO还原氧化铁+燃烧条件组合中等、陌生复杂方程式配平中等、陌生材料迁移中等、红磷气压曲线中等、标准碳酸钠沉淀纯度表格中等、KClO3单反应质量图中等。
-    V9阶段2.3：基于591题配对诊断，撤销1档题型白名单，按单项操作D与整题任务负担B联合校准1↔2；
+    V9阶段3：基于591题配对诊断，先取选项/小问内部最长过程D，再核对共享模型与完整闭环B，修正2档对3档的吸附；
     取消入口操作与总推理深度、内部依赖与多问依赖之间的错误强绑定。
     本阶段保留图片输入、缓存、重试和阶段1后处理算法，不改动中高档机制或后处理算法。
     难度级别：送分题 / 基础题 / 中等题 / 拔高题 / 压轴题。
@@ -2893,8 +2893,8 @@ def postprocess_chemistry_difficulty(
     return prepared
 
 if __name__ == "__main__":
-    print("Evidence-15 V9阶段2.3: 1↔2按单项操作D与整题任务负担B重新校准")
-    print(f"Evidence-15 V9阶段2.3后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法不变，同时报告raw与final）")
+    print("Evidence-15 V9阶段3: 2↔3按局部最长过程D与共享模型B顺序终审")
+    print(f"Evidence-15 V9阶段3后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法不变，同时报告raw与final）")
     print(f"Evidence-15 V9旧结构兼容: {'enabled' if ALLOW_LEGACY_CORE12_SCHEMA else 'disabled'}")
     print(f"Evidence-15 V9 image-primary图像输入: {'enabled' if ENABLE_IMAGE_INPUT else 'disabled'}")
     start_time = time.time()

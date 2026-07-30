@@ -35,7 +35,7 @@ class Evidence15V9Stage23Tests(unittest.TestCase):
     def test_stage23_keeps_controlled_variables(self) -> None:
         runner = RUNNER_PATH.read_text(encoding="utf-8")
         script = RUN_SCRIPT_PATH.read_text(encoding="utf-8")
-        self.assertIn("Evidence-15 V9阶段2.3", runner)
+        self.assertIn("Evidence-15 V9阶段3", runner)
         self.assertIn("evidence15_v9_stage2_3_591_", script)
         self.assertIn("--concurrency 30", script)
         self.assertIn("evidence15_boundary_rules_v9_stage1", script)

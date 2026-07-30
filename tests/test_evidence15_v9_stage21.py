@@ -74,7 +74,7 @@ class Evidence15V9Stage21Tests(unittest.TestCase):
 
     def test_current_v9_stage_is_visible_in_runner(self) -> None:
         source = RUNNER_PATH.read_text(encoding="utf-8")
-        self.assertIn("Evidence-15 V9阶段2.3", source)
+        self.assertIn("Evidence-15 V9阶段3", source)
 
 
 if __name__ == "__main__":
