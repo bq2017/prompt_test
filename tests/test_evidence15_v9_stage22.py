@@ -29,25 +29,15 @@ class Evidence15V9Stage22Tests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.prompt = load_prompt()
 
-    def test_textbook_prototypes_remain_level_one_candidates(self) -> None:
-        for text in (
-            "物理变化/化学变化",
-            "缓慢氧化",
-            "常见物质或材料类别",
-            "常见化学式、离子符号和化学用语正误",
-            "常见实验安全规范",
-            "低碳行为",
-            "教材原型识别延展性",
-        ):
-            self.assertIn(text, self.prompt)
-        self.assertIn("根据定义、应用规则、逐项判断", self.prompt)
-        self.assertIn("仍不能自动升档", self.prompt)
+    def test_failed_stage22_subject_whitelist_is_removed(self) -> None:
+        self.assertIn("不得建立“某类教材原型一律送分”的题型白名单", self.prompt)
+        self.assertIn("知识点名称不是档位白名单", self.prompt)
+        self.assertNotIn("以下统一按送分题比较", self.prompt)
 
-    def test_level_two_requires_new_information_or_real_competition(self) -> None:
-        self.assertIn("新增信息→规律→新增结论", self.prompt)
-        self.assertIn("新增结论不能只是给熟悉实例贴上教材类别标签", self.prompt)
-        self.assertIn("竞争解释A/B→决定性差异→排除结果", self.prompt)
-        self.assertIn("普通选择题排除错误项", self.prompt)
+    def test_level_two_no_longer_requires_hidden_conclusion(self) -> None:
+        self.assertIn("不要求必须是“隐藏结论”", self.prompt)
+        self.assertIn("多个不同判据的独立应用束", self.prompt)
+        self.assertIn("具体对象→适用规则→核验结果", self.prompt)
 
     def test_effective_high_level_boundaries_are_preserved(self) -> None:
         self.assertIn("卡点路径", self.prompt)
@@ -100,7 +90,7 @@ class Evidence15V9Stage22Tests(unittest.TestCase):
     def test_stage22_runner_and_script_keep_controlled_variables(self) -> None:
         runner = RUNNER_PATH.read_text(encoding="utf-8")
         script = RUN_SCRIPT_PATH.read_text(encoding="utf-8")
-        self.assertIn("Evidence-15 V9阶段2.2", runner)
+        self.assertIn("Evidence-15 V9阶段2.3", runner)
         self.assertIn("evidence15_v9_stage2_2_591_", script)
         self.assertIn("--concurrency 30", script)
         self.assertIn("evidence15_boundary_rules_v9_stage1", script)

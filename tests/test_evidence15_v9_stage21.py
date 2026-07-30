@@ -28,11 +28,10 @@ class Evidence15V9Stage21Tests(unittest.TestCase):
         cls.prompt = load_prompt()
 
     def test_low_boundary_has_two_operational_paths(self) -> None:
-        self.assertIn("真实推导路径", self.prompt)
-        self.assertIn("实质竞争辨析路径", self.prompt)
-        self.assertIn("由已给pH数值直接识别酸碱性", self.prompt)
-        self.assertIn("由指示剂变化推出未明示的溶液性质", self.prompt)
-        self.assertIn("竞争解释A/B→决定性差异→排除结果", self.prompt)
+        self.assertIn("基础通道A（一步应用）", self.prompt)
+        self.assertIn("基础通道B（独立应用束）", self.prompt)
+        self.assertIn("具体对象/条件→选择适用规则", self.prompt)
+        self.assertIn("至少两项不同的实际核验内容", self.prompt)
 
     def test_middle_boundary_has_three_paths_and_precedence(self) -> None:
         self.assertIn("连续依赖、完整闭环和综合核验三条通道", self.prompt)
@@ -62,7 +61,7 @@ class Evidence15V9Stage21Tests(unittest.TestCase):
     def test_summary_self_check_and_output_template_use_same_vocabulary(self) -> None:
         self.assertIn("连续依赖、完整闭环或综合核验", self.prompt)
         self.assertIn("一个具体高阶卡点，或写清不同实质任务如何围绕同一题目模型形成综合主线", self.prompt)
-        self.assertIn("真实推导或实质竞争辨析、常规综合、单一高阶卡点、综合主线或跨阶段联合模型", self.prompt)
+        self.assertIn("一次具体规则应用、多个不同判据的独立应用束、常规综合、单一高阶卡点、综合主线或跨阶段联合模型", self.prompt)
 
     def test_schema_fields_and_postprocess_profile_are_unchanged(self) -> None:
         self.assertEqual(len(CORE_FEATURE_FIELDS), 15)
@@ -75,7 +74,7 @@ class Evidence15V9Stage21Tests(unittest.TestCase):
 
     def test_current_v9_stage_is_visible_in_runner(self) -> None:
         source = RUNNER_PATH.read_text(encoding="utf-8")
-        self.assertIn("Evidence-15 V9阶段2.2", source)
+        self.assertIn("Evidence-15 V9阶段2.3", source)
 
 
 if __name__ == "__main__":
