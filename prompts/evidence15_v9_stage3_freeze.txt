@@ -1,0 +1,15 @@
+{
+  "version": "Evidence-15 V9 Stage3",
+  "frozen_prompt": "prompts/evidence15_v9_prompt.txt",
+  "git_commit": "f8569f72b9666352710c6c4428f93964fd85696e",
+  "sha256": "9ceae8e37806be0acd3993a809f0719750bc943f6a9c1dae8f11d58c7d92e80b",
+  "truth_source": "teacher-cleaned CSV standard_level; JSONL top-level difficulty is ignored",
+  "postprocess_profile": "evidence15_boundary_rules_v9_stage1",
+  "concurrency": 30,
+  "validated_runs": [
+    "evidence15_v9_stage3_591_20260730_130336",
+    "evidence15_v9_stage3_repeat2_591_20260730_131516",
+    "evidence15_v9_stage3_repeat3_591_20260730_132109"
+  ],
+  "final_exact_matches": [362, 366, 371]
+}

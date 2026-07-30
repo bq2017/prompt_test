@@ -2893,8 +2893,13 @@ def postprocess_chemistry_difficulty(
     return prepared
 
 if __name__ == "__main__":
-    print("Evidence-15 V9阶段3: 2↔3按局部最长过程D与共享模型B顺序终审")
-    print(f"Evidence-15 V9阶段3后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法不变，同时报告raw与final）")
+    run_stage = os.environ.get("CHEMISTRY_EVIDENCE15_V9_RUN_STAGE", "stage3")
+    if run_stage == "stage4":
+        print("Evidence-15 V9阶段4: 冻结Stage3 Prompt，仅实验4↔5双通道边界")
+        print(f"Evidence-15 V9阶段4后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法不变，同时报告raw与final）")
+    else:
+        print("Evidence-15 V9阶段3: 2↔3按局部最长过程D与共享模型B顺序终审")
+        print(f"Evidence-15 V9阶段3后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法不变，同时报告raw与final）")
     print(f"Evidence-15 V9旧结构兼容: {'enabled' if ALLOW_LEGACY_CORE12_SCHEMA else 'disabled'}")
     print(f"Evidence-15 V9 image-primary图像输入: {'enabled' if ENABLE_IMAGE_INPUT else 'disabled'}")
     start_time = time.time()
