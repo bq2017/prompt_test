@@ -2926,7 +2926,10 @@ def postprocess_chemistry_difficulty(
 
 if __name__ == "__main__":
     run_stage = os.environ.get("CHEMISTRY_EVIDENCE15_V9_RUN_STAGE", "stage3")
-    if run_stage == "stage5":
+    if run_stage == "stage5_compact":
+        print("Evidence-15 V9 Stage5 Compact: 仅压缩重复文本，判档逻辑保持Stage5")
+        print(f"Evidence-15 V9 Stage5 Compact后处理配置: {CORE12_POSTPROCESS_PROFILE}（自动4→5仅审计，不改档）")
+    elif run_stage == "stage5":
         print("Evidence-15 V9阶段5: 从冻结Stage3重建4↔5统一强耦合边界")
         print(f"Evidence-15 V9阶段5后处理配置: {CORE12_POSTPROCESS_PROFILE}（自动4→5仅审计，不改档）")
     elif run_stage == "stage4":

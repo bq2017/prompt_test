@@ -1,0 +1,126 @@
+from pathlib import Path
+import re
+
+
+_BASE_PATH = Path.cwd() / "prompts" / "evidence15_v9_stage5_prompt.txt"
+_namespace: dict[str, object] = {}
+exec(_BASE_PATH.read_text(encoding="utf-8"), _namespace)
+DIFFICULTY_RATING_PROMPT_PREFIX = str(_namespace["DIFFICULTY_RATING_PROMPT_PREFIX"])
+DIFFICULTY_RATING_PROMPT_SUFFIX = str(_namespace["DIFFICULTY_RATING_PROMPT_SUFFIX"])
+
+
+def _regex_replace_once(pattern: str, replacement: str, *, expected: int = 1) -> None:
+    global DIFFICULTY_RATING_PROMPT_PREFIX
+    updated, count = re.subn(pattern, replacement, DIFFICULTY_RATING_PROMPT_PREFIX)
+    if count != expected:
+        raise RuntimeError(
+            f"Stage5 Compact替换锚点数量异常: expected={expected} actual={count}: "
+            f"{pattern[:80]!r}"
+        )
+    DIFFICULTY_RATING_PROMPT_PREFIX = updated
+
+
+# 各档章节已完整定义核心依据、最低门槛与相邻否决条件；删除其中重复展开的
+# 21个长教师例题，统一在第五章保留最小边界锚点。
+_regex_replace_once(
+    r"(?ms)^#### 教师示例：.*?"
+    r"(?=^#### 教师示例：|^## 难度[1-5] —|^={20,})",
+    "",
+    expected=21,
+)
+
+# “常见误判警示”与最低门槛、相邻否决条件及统一终审协议重复。保留后者，
+# 删除五档内逐条复述的警示清单。
+_regex_replace_once(
+    r"(?ms)^### 常见误判警示\n.*?(?=^### 与相邻档的否决条件)",
+    "",
+    expected=5,
+)
+
+_COMPACT_ANCHORS = """## 五、相邻档位最小校准锚点
+
+锚点只用于确认边界方向，不能按题型名称匹配。真实定档仍以第二至第四章的任务结构、15项事实特征和相邻否决条件为准。
+
+### 送分题 vs 基础题
+
+- 同一透明标准重复：四个生活过程都只核验“是否生成新物质”，D=0且B为同规则重复，判送分题。
+- 不同规则的一步应用束：四幅实验操作图分别核验扇闻、滴管、瓶塞和量筒读数，每项均为0-1层但规则不同，判基础题。
+- 边界：一次具体规则应用或多个不同判据的一步应用束进入基础；选项数量和教材熟悉度均不能单独定档。
+
+### 基础题 vs 中等题
+
+- 已给方程式直接读取质量比例并一次代入，判基础题。
+- 溶解度曲线选项中出现“读曲线→确定状态/数值→计算或比较→判断”，最难选项内部达到2-3层且共享曲线模型，判中等题。
+- 边界：先取每个局部任务的最长过程D，再检查共享状态、完整闭环和联合筛选B；答案不复用不等于模型独立。
+
+### 中等题 vs 拔高题
+
+- 标准pH曲线按起始—中和—过量阶段正向核验，模型显性且无决定性转换，判中等题。
+- 指定环境下离子共存需把无色、酸碱性或Ba²⁺条件与候选离子共同约束并分类排除，判拔高题。
+- 实验现象若必须排除竞争解释才能评价证据充分性，也进入拔高比较。
+- 边界：中等题完成常规连续任务或闭环；拔高题需要一个决定性卡点，或不同实质任务围绕同一模型形成综合主线。
+
+### 拔高题 vs 压轴题
+
+- 软锰矿制MnCO₃虽含流程、氧化还原、温度图和沉淀反应，但可沿明确节点顺序拆解，判拔高题。
+- 木炭还原CuO的气体证据、范围判断和定量反推形成一个有限高阶卡点，仍判拔高题。
+- 锌灰制磷酸锌时，杂质去向、试剂不引杂、pH控制、产品目标和热重温区共同改变后续对象与约束，判压轴题。
+- 无水SnCl₄制备中，陌生物性共同决定装置、温控、防水和安全，并与纯度测定模型不可分离，判压轴题。
+- 边界：判5必须写出高阶任务H1、H2，确认关系属于模型选择、共同闭合或状态更新，并通过已知结果替代测试。普通数值传递、并列模块、流程长和步骤多不能触发5档；5档不成立后仍须独立复核4档。
+
+### 特殊压轴教师口径
+
+FeSO₄与Fe₂(SO₄)₃混合物由铁质量分数反求硫质量分数，只允许在“共同基团不变、剩余质量按固定组成拆分”的真同构题中沿用压轴口径。普通固定比例、单一守恒或一般混合物计算不得外推。
+
+================================================================================
+"""
+
+_regex_replace_once(
+    r"(?ms)^## 五、相邻档位边界校准 few-shot.*?(?=^## 六、题型结构复核)",
+    _COMPACT_ANCHORS,
+)
+
+# 第六章按题型给候选档位，与“禁止题型白名单”和各档核心标准重复，删除。
+_regex_replace_once(
+    r"(?ms)^## 六、题型结构复核.*?(?=^## 七、输出前强制自检)",
+    "",
+)
+
+_COMPACT_SELF_CHECK = """## 七、输出前强制自检
+
+1. 是否读完题干图与解析图，只把文字补充用于修复图片缺口？
+2. 是否先找最高难任务，再取局部最长过程D并判断整题关系B？
+3. 是否排除了题面长度、选项数、空数、知识点数和题型名称的机械影响？
+4. 1↔2是否区分同规则重复、一次实际应用和不同判据的一步应用束？
+5. 2↔3是否检查局部2-3层过程、共享状态、完整闭环或联合筛选？
+6. 3↔4是否写清决定性卡点，或同一模型上的综合主线？
+7. 4↔5若判5，是否写清H1、H2、关系类型和已知结果替代测试；若否决5，是否独立复核4？
+8. 15项特征是否均来自题面事实并严格使用枚举？reasoning是否只比较相邻档且与特征一致？
+
+================================================================================
+"""
+
+_regex_replace_once(
+    r"(?ms)^## 七、输出前强制自检.*?(?=^## 八、输出要求)",
+    _COMPACT_SELF_CHECK,
+)
+
+_COMPACT_OUTPUT_RULES = """## 八、输出要求
+
+只输出一个完整合法JSON对象，不要添加Markdown围栏或额外文字。顶层必须且只能包含`features`、`coarse_difficulty`、`reasoning`、`difficulty_level`：
+
+- `features`恰好包含第三章定义的15个字段，每个值必须逐字取自对应枚举，禁止近义改写、串位、漏项或增项。
+- `coarse_difficulty`只能取：送分/基础区间（1-2档）、基础/中等区间（2-3档）、中等/拔高区间（3-4档）、拔高/压轴区间（4-5档）。
+- `reasoning`必须且只能包含`core_basis`、`hard_point`、`why_not_lower`、`why_not_higher`。后两项只比较相邻档。
+- `difficulty_level`只能取：送分题、基础题、中等题、拔高题、压轴题，并与`coarse_difficulty`相容。
+- `core_basis`先写最高难任务及真实依赖，再概括决定性特征。多问时说明独立、共享模型或结果依赖；判4写卡点或综合主线；判5必须写`高阶任务H1：……；高阶任务H2：……；关系类型：模型选择/共同闭合/状态更新；已知结果替代测试：……`。
+- 内部逐小问分析，但JSON不得输出题目ID、教师锚点、`question_structure`、`subquestion_analysis`、`highest_difficulty_subquestion`或`confidence`。
+
+下面的固定生产JSON只表示字段结构和允许值；斜杠分隔时，实际输出只能选择其中一个完整字符串。
+
+"""
+
+_regex_replace_once(
+    r"(?ms)^## 八、输出要求.*?(?=^## 九、固定生产JSON)",
+    _COMPACT_OUTPUT_RULES,
+)
