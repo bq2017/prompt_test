@@ -2871,6 +2871,7 @@ def postprocess_chemistry_difficulty(
         "core12_dataaware_rules_v5",
         "evidence15_boundary_rules_v6",
         "evidence15_boundary_rules_v9_stage1",
+        "evidence15_boundary_rules_v9_stage5_audit45",
     }:
         raise Core12SchemaError(
             f"未知Evidence-15 V9后处理profile: {CORE12_POSTPROCESS_PROFILE!r}"
@@ -2888,13 +2889,47 @@ def postprocess_chemistry_difficulty(
         "evidence15_boundary_rules_v9_stage1",
     }:
         return apply_data_aware_boundary_rules(prepared, data)
+    if CORE12_POSTPROCESS_PROFILE == "evidence15_boundary_rules_v9_stage5_audit45":
+        calibrated = apply_data_aware_boundary_rules(prepared, data)
+        actions = calibrated.get("postprocess_actions") or []
+        hard_to_final = (
+            prepared["difficulty_level"] == "拔高题"
+            and calibrated["difficulty_level"] == "压轴题"
+            and len(actions) == 1
+            and actions[0].get("rule") == "dataaware_hard_to_final"
+        )
+        if hard_to_final:
+            audited = copy.deepcopy(prepared)
+            for field in (
+                "postprocess_evidence_counts",
+                "postprocess_semantic_flags",
+                "postprocess_task_block_count",
+                "postprocess_protections",
+            ):
+                if field in calibrated:
+                    audited[field] = copy.deepcopy(calibrated[field])
+            candidate = copy.deepcopy(actions[0])
+            candidate["mode"] = "audit_only"
+            candidate["applied"] = False
+            audited["postprocess_profile"] = CORE12_POSTPROCESS_PROFILE
+            audited["automatic_level_change_applied"] = False
+            audited["postprocess_actions"] = []
+            audited["postprocess_trace"] = []
+            audited["postprocess_audit_actions"] = [candidate]
+            return audited
+        calibrated["postprocess_profile"] = CORE12_POSTPROCESS_PROFILE
+        calibrated["postprocess_audit_actions"] = []
+        return calibrated
     prepared["postprocess_profile"] = "evidence15_v9_schema_only"
     prepared["automatic_level_change_applied"] = False
     return prepared
 
 if __name__ == "__main__":
     run_stage = os.environ.get("CHEMISTRY_EVIDENCE15_V9_RUN_STAGE", "stage3")
-    if run_stage == "stage4":
+    if run_stage == "stage5":
+        print("Evidence-15 V9阶段5: 从冻结Stage3重建4↔5统一强耦合边界")
+        print(f"Evidence-15 V9阶段5后处理配置: {CORE12_POSTPROCESS_PROFILE}（自动4→5仅审计，不改档）")
+    elif run_stage == "stage4":
         print("Evidence-15 V9阶段4: 冻结Stage3 Prompt，仅实验4↔5双通道边界")
         print(f"Evidence-15 V9阶段4后处理配置: {CORE12_POSTPROCESS_PROFILE}（算法不变，同时报告raw与final）")
     else:
