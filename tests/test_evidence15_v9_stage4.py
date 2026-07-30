@@ -26,7 +26,12 @@ class Evidence15V9Stage4Tests(unittest.TestCase):
 
     def test_stage3_prompt_is_frozen_by_hash(self) -> None:
         freeze = json.loads(FREEZE_PATH.read_text(encoding="utf-8"))
-        actual = hashlib.sha256(STAGE3_PROMPT_PATH.read_bytes()).hexdigest()
+        canonical_text = (
+            STAGE3_PROMPT_PATH.read_text(encoding="utf-8")
+            .replace("\r\n", "\n")
+            .replace("\r", "\n")
+        )
+        actual = hashlib.sha256(canonical_text.encode("utf-8")).hexdigest()
         self.assertEqual(freeze["sha256"], actual)
         self.assertEqual(freeze["concurrency"], 30)
         self.assertIn("teacher-cleaned CSV", freeze["truth_source"])
@@ -55,6 +60,8 @@ class Evidence15V9Stage4Tests(unittest.TestCase):
         self.assertIn("evidence15_boundary_rules_v9_stage1", script)
         self.assertIn('--labels "${LABELS}"', script)
         self.assertIn("顶层 difficulty 是旧输入错误标签", script)
+        self.assertIn('{\n  "${PYTHON[@]}" -m py_compile', script)
+        self.assertIn('} 2>&1 | tee "${LOG}"', script)
 
 
 if __name__ == "__main__":

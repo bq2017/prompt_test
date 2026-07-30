@@ -29,23 +29,23 @@ PYTHON=(
   python
 )
 
-"${PYTHON[@]}" -m py_compile \
-  "${ROOT}/src/chemistry_evidence15_v9_schema.py" \
-  "${ROOT}/src/chemistry_difficulty_rating_evidence15_v9_with_cache.py" \
-  "${ROOT}/tools/evaluate_chemistry_difficulty.py"
-
-PYTHONPATH="${ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}" \
-  "${PYTHON[@]}" -m unittest -v \
-    tests.test_prompt_evidence15_v9_contract \
-    tests.test_evidence15_v9_schema_retry \
-    tests.test_evidence15_v9_stage2 \
-    tests.test_evidence15_v9_stage21 \
-    tests.test_evidence15_v9_stage22 \
-    tests.test_evidence15_v9_stage23 \
-    tests.test_evidence15_v9_stage3 \
-    tests.test_evidence15_v9_stage4
-
 {
+  "${PYTHON[@]}" -m py_compile \
+    "${ROOT}/src/chemistry_evidence15_v9_schema.py" \
+    "${ROOT}/src/chemistry_difficulty_rating_evidence15_v9_with_cache.py" \
+    "${ROOT}/tools/evaluate_chemistry_difficulty.py"
+
+  PYTHONPATH="${ROOT}/src${PYTHONPATH:+:${PYTHONPATH}}" \
+    "${PYTHON[@]}" -m unittest -v \
+      tests.test_prompt_evidence15_v9_contract \
+      tests.test_evidence15_v9_schema_retry \
+      tests.test_evidence15_v9_stage2 \
+      tests.test_evidence15_v9_stage21 \
+      tests.test_evidence15_v9_stage22 \
+      tests.test_evidence15_v9_stage23 \
+      tests.test_evidence15_v9_stage3 \
+      tests.test_evidence15_v9_stage4
+
   echo "标准标签来源: 教师清洗CSV ${LABELS} 的 standard_level"
   echo "重要: 结果JSONL顶层 difficulty 是旧输入错误标签，正式评测一律忽略"
 
